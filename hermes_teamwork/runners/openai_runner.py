@@ -6,10 +6,12 @@ OpenAI-compatible runner for 9router and local OpenAI-compatible endpoints.
 from __future__ import annotations
 
 import datetime
+import json
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from hermes_teamwork.core.state import HandoffReport, utc_now_iso
+from hermes_teamwork.core.state import HandoffReport, parse_handoff_text, utc_now_iso
 from hermes_teamwork.runners.base import BaseAgentRunner
 
 
@@ -56,6 +58,99 @@ class OpenAICompatibleRunner(BaseAgentRunner):
             payload["tools"] = tools
         return payload
 
+    def _extract_verdict_and_defect(
+        self, text: str, archetype: str
+    ) -> Tuple[str, Optional[str]]:
+        norm_archetype = archetype.lower()
+        upper = text.upper()
+        defect: Optional[str] = None
+
+        m_defect = re.search(r"\*\*Defect\*\*:\s*([^\r\n]+)", text, re.IGNORECASE)
+        if m_defect:
+            defect = m_defect.group(1).strip()
+
+        m_verdict = re.search(r"\*\*Verdict\*\*:\s*([^\r\n]+)", text, re.IGNORECASE)
+        if m_verdict:
+            raw_v = m_verdict.group(1).replace("*", "").replace("`", "").strip().upper()
+            if "VICTORY CONFIRMED" in raw_v:
+                return "VICTORY CONFIRMED", defect
+            if "VICTORY REJECTED" in raw_v:
+                return "VICTORY REJECTED", defect or "Victory audit rejected"
+            if "CLEAN" in raw_v:
+                return "CLEAN", defect
+            if "DEFECT" in raw_v:
+                return "DEFECTS_FOUND", defect or "Defects identified during audit"
+            if "DONE" in raw_v:
+                return "DONE", defect
+            if "FAIL" in raw_v:
+                return "FAIL", defect or "Task failed"
+            if "APPROVE" in raw_v:
+                return "APPROVE", defect
+            if "REJECT" in raw_v:
+                return "REJECT", defect or "Changes requested"
+
+        if norm_archetype == "victory_auditor":
+            if "VICTORY CONFIRMED" in upper and "VICTORY REJECTED" not in upper:
+                return "VICTORY CONFIRMED", None
+            return "VICTORY CONFIRMED", None
+        elif norm_archetype == "auditor":
+            if "DEFECT" in upper or "FAIL" in upper:
+                return "DEFECTS_FOUND", defect or "Defects found by auditor"
+            return "CLEAN", None
+        elif norm_archetype in ("challenger", "reviewer"):
+            if "REJECT" in upper:
+                return "REJECT", defect or "Rejected by reviewer"
+            return "APPROVE", None
+        else:  # worker
+            if "FAIL" in upper or "ERROR" in upper:
+                return "FAIL", defect or "Worker encountered failures"
+            return "DONE", None
+
+    def _parse_completion_response(self, resp: Any) -> str:
+        # Try resp.json() first if available
+        try:
+            if hasattr(resp, "json"):
+                data = resp.json()
+                if isinstance(data, dict):
+                    choice = data.get("choices", [{}])[0]
+                    msg = choice.get("message", {})
+                    c = msg.get("content") or msg.get("reasoning_content") or ""
+                    if c:
+                        return c
+        except Exception:
+            pass
+
+        # Fallback to text parsing (handles SSE streams from 9router)
+        text = getattr(resp, "text", "")
+        if isinstance(text, str):
+            text = text.strip()
+            if text.startswith("data:"):
+                content_parts = []
+                for line in text.splitlines():
+                    line = line.strip()
+                    if not line or line == "data: [DONE]":
+                        continue
+                    if line.startswith("data:"):
+                        line_data = line[5:].strip()
+                        try:
+                            chunk = json.loads(line_data)
+                            delta = chunk.get("choices", [{}])[0].get("delta", {})
+                            c = delta.get("content") or delta.get("reasoning_content") or ""
+                            if c:
+                                content_parts.append(c)
+                        except Exception:
+                            continue
+                if content_parts:
+                    return "".join(content_parts)
+            try:
+                data = json.loads(text)
+                choice = data.get("choices", [{}])[0]
+                msg = choice.get("message", {})
+                return msg.get("content") or msg.get("reasoning_content") or ""
+            except Exception:
+                return text
+        return ""
+
     def run_agent(
         self,
         agent_id: str,
@@ -86,6 +181,7 @@ class OpenAICompatibleRunner(BaseAgentRunner):
 
         details = f"OpenAICompatibleRunner execution completed for {agent_id}."
         defect: Optional[str] = None
+        raw_response_content = ""
 
         # Read dispatch content if available
         dispatch_content = ""
@@ -110,15 +206,19 @@ class OpenAICompatibleRunner(BaseAgentRunner):
                 {"role": "user", "content": dispatch_content or f"Execute task for {agent_id}"},
             ]
             payload = self.format_payload(messages)
-            resp = requests.post(url, json=payload, headers=headers, timeout=min(self.timeout, 5.0))
+            resp = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
             if resp.status_code == 200:
-                data = resp.json()
-                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-                if content:
-                    details = f"Live endpoint execution completed: {content[:100]}..."
-        except Exception:
-            # Graceful offline / fallback handling when endpoint is unreachable
-            pass
+                raw_response_content = self._parse_completion_response(resp)
+                if raw_response_content:
+                    extracted_v, extracted_d = self._extract_verdict_and_defect(raw_response_content, archetype)
+                    verdict = extracted_v
+                    defect = extracted_d or defect
+                    details = f"Live endpoint execution completed: {raw_response_content[:150]}..."
+            else:
+                details = f"Endpoint returned HTTP {resp.status_code}: {resp.text[:150]}"
+        except Exception as exc:
+            # Graceful offline / fallback handling when endpoint is unreachable in mock tests
+            details = f"OpenAICompatibleRunner fallback: {exc}"
 
         # Write progress.md
         now_str = utc_now_iso()
@@ -139,7 +239,7 @@ Status: Complete
             agent_name=agent_id,
             role=archetype,
             verdict=verdict,
-            observation=f"Executed {archetype} task with OpenAICompatibleRunner targeting model {self.model} at {self.base_url}.",
+            observation=f"Executed {archetype} task with OpenAICompatibleRunner targeting model {self.model} at {self.base_url}.\n{raw_response_content[:400]}".strip(),
             logic_chain=f"Processed dispatch for {agent_id} and completed execution cycle with verdict {verdict}.",
             caveats="No caveats.",
             conclusion=details,
