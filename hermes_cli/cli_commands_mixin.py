@@ -1541,6 +1541,39 @@ class CLICommandsMixin(CLICommandsSessionToolsMixin, CLIHandoffMixin):
             return _cp(f"  {_t('review.failed', error=exc)}")
         _cp(f"  {format_dispatch_note(result, prompt)}")
 
+    def _handle_teamwork_command(self, cmd: str) -> None:
+        """Dispatch /teamwork — launch Antigravity multi-agent Teamwork swarm on the given request."""
+        prompt = _command_arg(cmd)
+        if not prompt or not prompt.strip():
+            _cp(_dim_line("Usage: /teamwork <task or project request> (aliases: /team_work, /swarm)"))
+            _cp(_dim_line("Example: /teamwork Build authentication module with JWT"))
+            return
+
+        preview = _ellipsize(prompt, 60)
+        _cp(_accent_line(f"🚀 Hermes Teamwork: Launching autonomous multi-agent swarm on: '{preview}'"))
+        _cp(_dim_line("Architecture: Sentinel -> Orchestrator (Waves 1-3) -> Strict-AND Gate -> Victory Auditor"))
+
+        def produce():
+            import subprocess
+            import sys
+            p = subprocess.Popen(
+                [sys.executable, "-m", "hermes_teamwork.cli", "--request", prompt],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            out, _ = p.communicate()
+            return out or "(Teamwork run completed with exit code 0)"
+
+        self._side_worker(
+            produce,
+            name="teamwork-swarm",
+            fail_label="/teamwork",
+            header_lines=[f"  🚀 Hermes Teamwork Final Report for: {preview}"],
+            title_suffix="teamwork",
+            empty_note="  (Teamwork completed)",
+        ).start()
+
     # ---- /goal, /loop, /subgoal -----------------------------------------------------------
     def _handle_goal_command(self, cmd: str) -> None:
         from hermes_cli.gateway_automation import dispatch_goal_command  # /goal draft drafts on the gateway

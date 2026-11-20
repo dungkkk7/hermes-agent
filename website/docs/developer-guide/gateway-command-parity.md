@@ -26,7 +26,7 @@ narrower routes (`hermes_cli/gateway_chat_commands.py`).
 setting to this local session (its next turn and `config.get`), saving config.yaml only where the
 handler does; `client-local (cli_only)` commands are terminal/UI features of a client.
 
-105 registry commands: 29 control, 19 read, 57 refused.
+106 registry commands: 29 control, 19 read, 58 refused.
 
 | Command | Gateway (`slash.exec`) | Classic CLI | Ink | Desktop | ACP | Notes |
 |---|---|---|---|---|---|---|
@@ -109,7 +109,7 @@ handler does; `client-local (cli_only)` commands are terminal/UI features of a c
 | `/sessions` | refused | HermesCLI._handle_sessions_command | local | picker: session | slash.exec: refused | messaging origin-scoped listing (`/sessions all` needs a messaging admin) |
 | `/sethome` (/set-home) | refused | messaging-only: unknown command | slash.exec: refused | unavailable: terminal | slash.exec: refused | messaging-only |
 | `/skills` | read (bare/`pending`/`diff`; `approve`/`reject`/`approval` control; hub refused) | HermesCLI._cmd_skills | slash.exec; sidecar: skills.manage | slash.exec | slash.exec | client-local (cli_only) |
-| `/skin` | refused | HermesCLI._handle_skin_command | config.get, config.set | action: skin | slash.exec: refused | client-local (cli_only) |
+| `/skin` (/theme) | refused | HermesCLI._handle_skin_command | config.get, config.set | action: skin | slash.exec: refused | client-local (cli_only) |
 | `/snapshot` (/snap) | refused | HermesCLI._handle_snapshot_command | slash.exec: refused | unavailable: terminal | slash.exec: refused | client-local (cli_only) |
 | `/start` | refused | messaging-only: unknown command | slash.exec: refused | slash.exec: refused | slash.exec: refused | messaging-only |
 | `/status` | read | HermesCLI._show_session_status | canonical route | slash.exec (rpc fallback) | slash.exec | TUI session: main's `Hermes TUI Status` |
@@ -119,6 +119,7 @@ handler does; `client-local (cli_only)` commands are terminal/UI features of a c
 | `/subgoal` | control | HermesCLI._handle_subgoal_command | slash.exec | slash.exec | slash.exec |  |
 | `/subscription` (/upgrade) | refused | HermesCLI._show_subscription | sidecar: subscription.state | slash.exec: refused | slash.exec: refused | client-local (cli_only) |
 | `/suggestions` (/suggest) | read (bare only) | HermesCLI._handle_suggestions_command | slash.exec | slash.exec | slash.exec |  |
+| `/teamwork` (/team_work, /swarm) | refused | HermesCLI._handle_teamwork_command | slash.exec: refused | slash.exec: refused | slash.exec: refused | client-local (cli_only) |
 | `/timestamps` (/ts) | refused | HermesCLI._handle_timestamps_command | config.set | action: timestamps | slash.exec: refused | client-local (cli_only) |
 | `/title` | control | HermesCLI._cmd_title | canonical route | action: title | session.mutate rename (bare: slash.exec) |  |
 | `/tools` | refused | HermesCLI._handle_tools_command | refused: not available yet | slash.exec: refused | session.info | client-local (cli_only) |

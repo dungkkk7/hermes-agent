@@ -1,0 +1,9 @@
+# Hermes Teamwork Configuration
+runner: "9router"
+model: "ag/gemini-3.8-flash"
+base_url: "http://localhost:20128/v1"
+api_key: "sk-56d9318c7bdcdcad-dayiif-c44e8cb6"
+max_iterations: 4
+succession_threshold: 16
+timeout: 120
+probe_dir_isolation: true

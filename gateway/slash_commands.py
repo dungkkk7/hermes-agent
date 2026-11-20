@@ -646,6 +646,17 @@ class GatewaySlashCommandsMixin(
         reply = _execute("commands", args=event.get_command_args(), options=options)
         return self._telegramized_command_reply(event, reply.text)
 
+    async def _handle_teamwork_command(self, event: MessageEvent) -> str:
+        """Handle /teamwork — execute Antigravity multi-agent teamwork swarm on the given task."""
+        prompt = event.get_command_args()
+        if not prompt or not prompt.strip():
+            return "Usage: /teamwork <task or project request> (aliases: /team_work, /swarm)"
+        import subprocess, sys, asyncio
+        def run():
+            p = subprocess.run([sys.executable, "-m", "hermes_teamwork.cli", "--request", prompt], capture_output=True, text=True)
+            return p.stdout or p.stderr or "(Teamwork completed with exit code 0)"
+        return await asyncio.to_thread(run)
+
     async def _handle_set_home_command(self, event: MessageEvent) -> str:
         """Handle /sethome command -- set the current chat as the platform's home channel."""
         from gateway.run import _home_target_env_var, _home_thread_env_var
