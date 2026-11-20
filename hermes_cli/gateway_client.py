@@ -381,8 +381,14 @@ async def connect_gateway(endpoint=None, subject=None, *, max_size=8 * 1024 * 10
         # The gateway is a loopback (or explicitly named) peer, never something to route through the
         # user's HTTP(S) proxy; websockets>=14 reads HTTP_PROXY/HTTPS_PROXY by default and a proxy that
         # cannot reach 127.0.0.1 turns every launch into a 10 s open timeout.
-        async with connect(url, subprotocols=protocols, open_timeout=10, max_size=max_size,
-                           proxy=None) as ws:
+        ws_kwargs = {"subprotocols": protocols, "open_timeout": 10, "max_size": max_size}
+        try:
+            import websockets
+            if int(getattr(websockets, "__version__", "0").split(".")[0]) >= 14:
+                ws_kwargs["proxy"] = None
+        except Exception:
+            pass
+        async with connect(url, **ws_kwargs) as ws:
             if protocols and ws.subprotocol != GATEWAY_WS_PROTOCOL:
                 raise GatewayClientError("Gateway protocol mismatch; update/restart required")
             async with GatewayClient(ws) as client:
