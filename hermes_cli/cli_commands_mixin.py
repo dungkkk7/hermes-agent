@@ -1556,8 +1556,15 @@ class CLICommandsMixin(CLICommandsSessionToolsMixin, CLIHandoffMixin):
         def produce():
             import subprocess
             import sys
+            import shutil
+            exe = shutil.which("hermes-teamwork")
+            cmd = [exe, "--request", prompt] if exe else [
+                sys.executable, "-c",
+                "import sys; from hermes_teamwork.cli import main; sys.exit(main())",
+                "--request", prompt,
+            ]
             p = subprocess.Popen(
-                [sys.executable, "-m", "hermes_teamwork.cli", "--request", prompt],
+                cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
