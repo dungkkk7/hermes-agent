@@ -1,243 +1,234 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Hermes Agent" width="100%">
+  <img src="assets/banner.png" alt="Hermes Teamwork" width="100%">
 </p>
 
-# Hermes Agent ☤
+# Hermes Teamwork ☤
+
 <p align="center">
-  <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> | <a href="https://hermes-agent.nousresearch.com/">Hermes Desktop</a>
-</p>
-<p align="center">
-  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="Built by Nous Research"></a>
-  <a href="README.zh-CN.md"><img src="https://img.shields.io/badge/Lang-中文-red?style=for-the-badge" alt="中文"></a>
-  <a href="README.ur-pk.md"><img src="https://img.shields.io/badge/Lang-اردو-green?style=for-the-badge" alt="اردو"></a>
-  <a href="README.es.md"><img src="https://img.shields.io/badge/Lang-Español-orange?style=for-the-badge" alt="Español"></a>
+  <a href="https://github.com/NousResearch/hermes-agent"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License: MIT"></a>
+  <a href="#-testing--verification"><img src="https://img.shields.io/badge/Tests-690%20Passed-brightgreen.svg?style=for-the-badge" alt="Tests: 690 Passed"></a>
+  <a href="docs/CONFIGURATION.md#5-local-llm-configuration-with-9router--nous-hermes-2-yi-34b"><img src="https://img.shields.io/badge/9router-Ready-purple.svg?style=for-the-badge" alt="9router: Ready"></a>
+  <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20on-Nous%20Research%20Hermes-blueviolet?style=for-the-badge" alt="Built on Nous Research Hermes"></a>
 </p>
 
-**The self-improving AI agent built by [Nous Research](https://nousresearch.com).** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
-
-Use any model you want — [Nous Portal](https://portal.nousresearch.com), OpenRouter, OpenAI, your own endpoint, and [many others](https://hermes-agent.nousresearch.com/docs/integrations/providers). Switch with `hermes model` — no code changes, no lock-in.
-
-<table>
-<tr><td><b>A real terminal interface</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output.</td></tr>
-<tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, and CLI — all from a single gateway process. Voice memo transcription, cross-platform conversation continuity.</td></tr>
-<tr><td><b>A closed learning loop</b></td><td>Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use. FTS5 session search with LLM summarization for cross-session recall. <a href="https://github.com/plastic-labs/honcho">Honcho</a> dialectic user modeling. Compatible with the <a href="https://agentskills.io">agentskills.io</a> open standard.</td></tr>
-<tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler with delivery to any platform. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
-<tr><td><b>Delegates and parallelizes</b></td><td>Spawn isolated subagents for parallel workstreams. In Desktop, choose their provider, model, and limits under Settings → Model → Subagents, then Apply the complete route. Write Python scripts that call tools via RPC, collapsing multi-step pipelines into zero-context-cost turns.</td></tr>
-<tr><td><b>Runs anywhere, not just your laptop</b></td><td>Six built-in terminal backends — local, Docker, SSH, Modal, Daytona, and Vercel Sandbox — plus plugin backends such as Singularity/Apptainer. Daytona and Modal offer serverless persistence — your agent's environment hibernates when idle and wakes on demand, costing nearly nothing between sessions. Run it on a $5 VPS or a GPU cluster.</td></tr>
-<tr><td><b>Research-ready</b></td><td>Batch trajectory generation, trajectory compression for training the next generation of tool-calling models.</td></tr>
-</table>
+**Hermes Teamwork** integrates Antigravity's autonomous multi-agent operating architecture into [Nous Research's Hermes Agent](https://nousresearch.com) as a production-grade, modular integration layer. It equips Hermes with formal wave decomposition, adversarial review gates, file-based state persistence, automatic succession, and local LLM execution via 9router.
 
 ---
 
-## Quick Install
+## 🏛️ Architectural Overview
 
-### Linux, macOS, WSL2
+Hermes Teamwork operates through an invariant-driven, multi-tier agent hierarchy:
+
+```
+                      User / CLI / Hermes Chat
+                                 │
+                                 ▼
+                     [ Sentinel Lifecycle Agent ]
+             Permanent User Liaison | Relay-Only Invariant
+             Immutable Request Freezing (`ORIGINAL_REQUEST.md`)
+             Reporting Cron (*/8m) | Liveness Watchdog (*/10m)
+                                 │
+                                 ▼
+                    [ Project Orchestrator ]
+             Strict Dispatch-Only Invariant | Succession @ 16 Spawns
+                                 │
+     ┌───────────────────────────┼───────────────────────────┐
+     ▼                           ▼                           ▼
+[ Wave 1: Explorers ]     [ Wave 2: Workers ]       [ Wave 3: Verifiers ]
+• Codebase Miners         • Core Implementers       • Dual Reviewers (Target + Regr)
+• Spec Analyzers          • Test Implementers       • Adversarial Challengers (x2)
+• Architecture Surveyors  • Documentation Writers   • Forensic Integrity Auditor
+                                                             │
+                                                             ▼
+                                                [ Adversarial Review Gate ]
+                                                Strict AND Consensus Logic
+                                                Auditor Forensic Binary Veto
+                                                GATE_STATUS.md & DEAD_ENDS.md
+                                                             │
+                                                             ▼ (Upon Victory Claim)
+                                                [ Independent Victory Audit ]
+                                                Isolated Probe (`teamwork_probe.XXXXXX`)
+                                                Zero Test Tampering Guarantee
+```
+
+---
+
+## ✨ Key Capabilities
+
+| Capability | Description | Architectural Contract |
+|---|---|---|
+| **Sentinel User Liaison** | Dedicated external interface isolating the multi-agent core from conversational drift. Freezes user requests into an immutable `ORIGINAL_REQUEST.md`. | Relay-only negative invariant; periodic reporting (`*/8m`) and watchdog (`*/10m`). |
+| **3-Wave Execution Model** | Structured problem decomposition ensuring investigation precedes coding and adversarial evaluation precedes merge. | Wave 1 (Explorers) $\rightarrow$ Wave 2 (Workers) $\rightarrow$ Wave 3 (Verifiers). |
+| **Strict AND Adversarial Gate** | Zero-trust verification pipeline. Requires unanimous approval from implementers, reviewers, and adversarial falsifiers. | Pass iff Worker `DONE` + Auditor `CLEAN` + Reviewers `APPROVE` + Challengers `APPROVE`. Auditor holds instant binary veto. |
+| **Persistent File-Based State** | Full observability and auditability without opaque in-memory databases. State is preserved under `.agents/teamwork/<run_id>/`. | Persistent `BRIEFING.md` (<100 lines, locked 🔒 sections), `progress.md` liveness heartbeat, `GATE_STATUS.md`, and `DEAD_ENDS.md`. |
+| **Succession & Lineage** | Prevents context window degradation and runaway agent execution by delegating to fresh generations. | Hard trigger at 16 cumulative subagent spawns; structured soft handoff; background task cleanup; lineage tracking (`gen1`, `gen2`, etc.). |
+| **Hermes Native Integration** | Pluggable runner architecture supporting offline deterministic mocks, local OpenAI-compatible gateways (9router), and native Hermes `AIAgent`. | `BaseAgentRunner` protocol implemented by `MockAgentRunner`, `OpenAICompatibleRunner`, and `HermesAgentRunner`. |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Installation
+
+Install Hermes Teamwork in editable mode from the repository root:
 
 ```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+# Clone the repository
+git clone https://github.com/NousResearch/hermes-agent.git hermes_teamwork
+cd hermes_teamwork
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install in editable mode
+pip install -e .
+
+# Or install without external dependencies for rapid standalone use:
+pip install -e . --no-deps
 ```
 
-### Windows (native, PowerShell)
-
-> **Heads up:** Native Windows runs Hermes without WSL — CLI, gateway, TUI, and tools all work natively. If you'd rather use WSL2, the Linux/macOS one-liner above works there too. Found a bug? Please [file issues](https://github.com/NousResearch/hermes-agent/issues).
-
-Run this in PowerShell:
-
-```powershell
-iex (irm https://hermes-agent.nousresearch.com/install.ps1)
-```
-
-The source installer delegates Python 3.14, Node.js, npm, pnpm, ripgrep, FFmpeg,
-and Python dependencies to PM. If Git is absent, it stages the verified Git
-for Windows archive in Hermes' tool store. It does not replace your system Git.
-See [installation methods](https://hermes-agent.nousresearch.com/docs/getting-started/installation)
-for the separate MSIX/App Installer package and its update ownership.
-
-> **Android / Termux:** A signed APT repository is available for aarch64 devices, with a `stable` channel (tagged releases) and a prerelease `canary` channel. The package includes Python, Node.js, and the TUI. Use the [Termux guide](https://hermes-agent.nousresearch.com/docs/getting-started/termux), not the desktop/server installer script.
->
-> **Windows:** Native Windows is fully supported — the PowerShell one-liner above installs everything. If you'd rather use WSL2, the Linux command works there too. Native Windows install lives under `%LOCALAPPDATA%\hermes`; WSL2 installs under `~/.hermes` as on Linux.
-
-After installation:
+Verify that the CLI is available:
 
 ```bash
-source ~/.bashrc    # reload shell (or: source ~/.zshrc)
-hermes              # start chatting!
+hermes-teamwork --version
+# Output: hermes-teamwork 0.1.0
+
+hermes-teamwork --help
 ```
 
-### Troubleshooting
+### 2. Basic CLI Execution
 
-#### Windows Defender or antivirus flags `uv.exe` as malware
-
-If your antivirus (Bitdefender, Windows Defender, etc.) quarantines `uv.exe` from the Hermes `bin` folder (`%LOCALAPPDATA%\hermes\bin\uv.exe`), this is a **false positive**. The file is Astral's `uv` — the Rust Python package manager Hermes bundles to manage its Python environment. ML-based antivirus engines commonly flag unsigned Rust binaries that download and install packages.
-
-**To verify your copy is authentic:**
-
-```powershell
-# Install GitHub CLI if needed
-winget install --id GitHub.cli
-
-# Login to GitHub
-gh auth login
-
-# Run verification
-$uv = "$env:LOCALAPPDATA\hermes\bin\uv.exe"
-$ver = (& $uv --version).Split(' ')[1]
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$zip = "$env:TEMP\uv.zip"
-Invoke-WebRequest "https://github.com/astral-sh/uv/releases/download/$ver/uv-x86_64-pc-windows-msvc.zip" -OutFile $zip -UseBasicParsing
-gh attestation verify $zip --repo astral-sh/uv
-Expand-Archive $zip "$env:TEMP\uv_x" -Force
-(Get-FileHash "$env:TEMP\uv_x\uv.exe").Hash -eq (Get-FileHash $uv).Hash
-```
-
-If attestation says "Verification succeeded" and the last line prints `True`, you're good.
-
-**To whitelist Hermes:**
-- **Windows Defender:** Run PowerShell as Admin → `Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\hermes\bin"`
-- **Bitdefender:** Add an exception in the Bitdefender console (Protection > Antivirus > Settings > Manage Exceptions)
-- Whitelist the **folder**, not the file hash — Hermes updates `uv` and the hash changes every version
-
-For more context, see the upstream Astral reports: [astral-sh/uv#13553](https://github.com/astral-sh/uv/issues/13553), [astral-sh/uv#15011](https://github.com/astral-sh/uv/issues/15011), [astral-sh/uv#10079](https://github.com/astral-sh/uv/issues/10079).
-
----
-
-## Getting Started
+Run an autonomous multi-agent task using the offline mock runner:
 
 ```bash
-hermes              # Interactive CLI — start a conversation
-hermes model        # Choose your LLM provider and model
-hermes tools        # Configure which tools are enabled
-hermes config set   # Set individual config values
-hermes config get   # Print individual config values
-hermes gateway      # Start the messaging gateway (Telegram, Discord, etc.)
-hermes setup        # Run the full setup wizard (configures everything at once)
-hermes update       # Update to the latest version
-hermes doctor       # Diagnose any issues
+hermes-teamwork --runner mock --request "Design a high-performance memory cache module"
 ```
 
-📖 **[Full documentation →](https://hermes-agent.nousresearch.com/docs/)**
-
----
-
-## Skip the API-key collection — Nous Portal
-
-Hermes works with whatever provider you want — that's not changing. But if you'd rather not collect five separate API keys for the model, web search, image generation, TTS, and a cloud browser, **[Nous Portal](https://portal.nousresearch.com)** covers all of them under one subscription:
-
-- **300+ models** — pick any of them with `/model <name>`
-- **Tool Gateway** — web search, image generation (FAL), text-to-speech (OpenAI), cloud browser (Browser Use), all routed through your sub. No extra accounts.
-
-One command from a fresh install:
+Or execute against a live local 9router endpoint (running on port `20128` with `Nous-Hermes-2-Yi-34B`):
 
 ```bash
-hermes setup --portal
+hermes-teamwork "Refactor authentication layer" --runner 9router --workspace /path/to/project
 ```
 
-That logs you in via OAuth, sets Nous as your provider, and turns on the Tool Gateway. Check what's wired up any time with `hermes portal info`. Full details on the [Tool Gateway docs page](https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway).
+### 3. Programmatic Python API
 
-You can still bring your own keys per-tool whenever you want — the gateway is per-backend, not all-or-nothing.
+Embed Teamwork directly into your Python scripts or custom Hermes agents:
 
----
+```python
+from pathlib import Path
+from hermes_teamwork.core.sentinel import Sentinel
+from hermes_teamwork.runners.mock_runner import MockAgentRunner
 
-## CLI vs Messaging Quick Reference
+# Initialize runner and target workspace
+runner = MockAgentRunner()
+workspace = Path("./my_project").resolve()
 
-Hermes has two entry points: start the terminal UI with `hermes`, or run the gateway and talk to it from Telegram, Discord, Slack, WhatsApp, Signal, or Email. Once you're in a conversation, many slash commands are shared across both interfaces.
+# Launch Sentinel mission
+sentinel = Sentinel(workspace_root=workspace, runner=runner)
+result = sentinel.run("Build a rate limiting middleware with token bucket algorithm")
 
-| Action                         | CLI                                           | Messaging platforms                                                              |
-| ------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------- |
-| Start chatting                 | `hermes`                                      | Run `hermes gateway setup` + `hermes gateway start`, then send the bot a message |
-| Start fresh conversation       | `/new` or `/reset`                            | `/new` or `/reset`                                                               |
-| Change model                   | `/model [provider:model]`                     | `/model [provider:model]`                                                        |
-| Set a personality              | `/personality [name]`                         | `/personality [name]`                                                            |
-| Retry or undo the last turn    | `/retry`, `/undo`                             | `/retry`, `/undo`                                                                |
-| Compress context / check usage | `/compress`, `/usage`, `/insights [--days N]` | `/compress`, `/usage`, `/insights [days]`                                        |
-| Browse skills                  | `/skills` or `/<skill-name>`                  | `/<skill-name>`                                                                  |
-| Interrupt current work         | `Ctrl+C` or send a new message                | `/stop` or send a new message                                                    |
-| Platform-specific status       | `/platforms`                                  | `/status`, `/sethome`                                                            |
+print(f"Status:    {result.status}")
+print(f"Run ID:    {result.run_id}")
+print(f"Artifacts: {result.run_dir}")
+```
 
-For the full command lists, see the [CLI guide](https://hermes-agent.nousresearch.com/docs/user-guide/cli) and the [Messaging Gateway guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging).
+### 4. Running the Standalone Executable Examples
 
----
-
-## Documentation
-
-All documentation lives at **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**:
-
-| Section                                                                                             | What's Covered                                             |
-| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart)                 | Install → setup → first conversation in 2 minutes          |
-| [CLI Usage](https://hermes-agent.nousresearch.com/docs/user-guide/cli)                              | Commands, keybindings, personalities, sessions             |
-| [Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)                | Config file, providers, models, all options                |
-| [Messaging Gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging)                | Telegram, Discord, Slack, WhatsApp, Signal, Home Assistant |
-| [Security](https://hermes-agent.nousresearch.com/docs/user-guide/security)                          | Command approval, DM pairing, container isolation          |
-| [Tools & Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools)            | 40+ tools, toolset system, terminal backends               |
-| [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills)              | Procedural memory, Skills Hub, creating skills             |
-| [Memory](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory)                     | Persistent memory, user profiles, best practices           |
-| [MCP Integration](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)               | Connect any MCP server for extended capabilities           |
-| [Cron Scheduling](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)              | Scheduled tasks with platform delivery                     |
-| [Context Files](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files)       | Project context that shapes every conversation             |
-| [Architecture](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture)             | Project structure, agent loop, key classes                 |
-| [Contributing](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing)             | Development setup, PR process, code style                  |
-| [CLI Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands)                  | All commands and flags                                     |
-| [Environment Variables](https://hermes-agent.nousresearch.com/docs/reference/environment-variables) | Complete env var reference                                 |
-
----
-
-## Migrating from OpenClaw or another agent
-
-If you're coming from OpenClaw, Claude Code, Codex CLI or Cursor, Hermes can import your settings, memories and skills (and, for OpenClaw, API keys when you ask for them).
-
-**During setup:** `hermes setup` asks whether to import from another agent, pre-selects the ones it finds (`~/.openclaw`, `~/.claude`, `~/.codex`, `~/.cursor`), installs the official `agent-importers` plugin and runs the import with a preview first.
-
-**Anytime after install:**
+Hermes Teamwork provides ready-to-run example scripts in the `examples/` directory:
 
 ```bash
-hermes plugins install agent-importers          # once per profile
-hermes import-agent openclaw                    # interactive migration (full preset)
-hermes import-agent openclaw --dry-run          # preview what would be migrated
-hermes import-agent openclaw --migrate-secrets  # also bring allowlisted API keys
-hermes import-agent claude-code                 # or codex / cursor
+# Run offline deterministic mock workflow (Zero network required)
+python3 examples/run_offline_mock.py
+
+# Run live 9router verification (Local port 20128)
+python3 examples/run_live_9router.py
 ```
 
-What gets imported from OpenClaw:
+---
 
-- **SOUL.md** — persona file
-- **Memories** — MEMORY.md and USER.md entries
-- **Skills** — user-created skills → `~/.hermes/skills/openclaw-imports/`
-- **Command allowlist** — approval patterns
-- **Messaging settings** — platform configs, allowed users, working directory
-- **API keys** — allowlisted secrets (Telegram, OpenRouter, OpenAI, Anthropic, ElevenLabs), only with `--migrate-secrets`
-- **TTS assets** — workspace audio files
-- **Workspace instructions** — AGENTS.md (with `--workspace-target`)
+## 📚 Documentation Index
 
-`hermes claw migrate` still works as the older spelling. See the [OpenClaw migration guide](https://hermes-agent.nousresearch.com/docs/guides/migrate-from-openclaw) and [Import from Other Agents](https://hermes-agent.nousresearch.com/docs/user-guide/import-from-other-agents).
+For comprehensive guides, architectural deep dives, and full API references, explore our documentation suite:
+
+| Document | Description |
+|---|---|
+| 📖 [Architecture Specification](docs/ARCHITECTURE.md) | In-depth breakdown of the 3-wave model, Adversarial Review Gate, State Engine, and Succession Protocol. |
+| 🛠️ [Installation Guide](docs/INSTALLATION.md) | Prerequisites, environment configuration, dependency management, and CLI verification. |
+| ⚙️ [Configuration Guide](docs/CONFIGURATION.md) | Configuration schema (`hermes_teamwork.yaml`), environment variables, and local 9router / LLM setup. |
+| 🔍 [API Reference](docs/API_REFERENCE.md) | Complete module, class, and method signatures for Core (`state`, `gate`, `orchestrator`, `sentinel`), Runners, and Config. |
+| 💡 [Runnable Examples Guide](docs/RUNNABLE_EXAMPLES.md) | Step-by-step tutorials covering offline mock runs, live 9router workflows, CLI usage, and programmatic embedding. |
 
 ---
 
-## Contributing
+## 🧪 Testing & Verification
 
-We welcome contributions! See the [Contributing Guide](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) for development setup, code style, and PR process.
+Hermes Teamwork includes a dual-track automated verification suite designed to run offline deterministically or against live endpoints.
 
-Start with the [PM developer workflow](website/docs/reference/package-management.md#developer-workflow)
-for activation, daily use, dependency changes, and leaving the environment.
-[Development Setup](CONTRIBUTING.md#development-setup) covers the separate test environment and verification commands.
+### Running Unit & Integration Tests (174 Tests)
+
+```bash
+pytest tests/unit/ tests/integration/
+```
+
+### Running Opaque-Box E2E Tests (516 Tests)
+
+```bash
+pytest tests/e2e_opaque/ -m "not live"
+```
+
+### Running Live 9router E2E Verification
+
+```bash
+# Standalone live verification runner
+python3 hermes_teamwork/scripts/verify_live_9router.py
+
+# Live pytest canary (requires running 9router endpoint on port 20128)
+pytest tests/live/ -m live
+```
 
 ---
 
-## Community
+## 📦 Packaging & Project Structure
 
-- 💬 [Discord](https://discord.gg/NousResearch)
-- 📚 [Skills Hub](https://agentskills.io)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
-- 🔌 [computer-use-linux](https://github.com/avifenesh/computer-use-linux) — Linux desktop-control MCP server for Hermes and other MCP hosts, with AT-SPI accessibility trees, Wayland/X11 input, screenshots, and compositor window targeting.
-- 🔌 [HermesClaw](https://github.com/AaronWong1999/hermesclaw) — Community WeChat bridge: Run Hermes Agent and OpenClaw on the same WeChat account.
+```
+hermes_teamwork/
+├── pyproject.toml              # PEP 621 packaging & dependencies
+├── hermes_teamwork/            # Core integration package
+│   ├── cli.py                  # Standalone CLI entrypoint (`hermes-teamwork`)
+│   ├── config.py               # YAML & environment variable configuration loader
+│   ├── core/                   # Architecture engine
+│   │   ├── state.py            # Isolated .agents/teamwork/ state persistence
+│   │   ├── gate.py             # Strict AND Adversarial Review Gate
+│   │   ├── orchestrator.py     # Wave-based Project Orchestrator & Succession
+│   │   └── sentinel.py         # Sentinel lifecycle manager & Victory Auditor
+│   ├── runners/                # Pluggable execution backends
+│   │   ├── base.py             # BaseAgentRunner interface protocol
+│   │   ├── mock_runner.py      # Offline deterministic multi-round mock runner
+│   │   ├── openai_runner.py    # OpenAI-compatible / 9router runner
+│   │   └── hermes_runner.py    # Native Hermes AIAgent bridge
+│   ├── prompts/                # Immutable role prompt templates
+│   └── scripts/
+│       └── verify_live_9router.py  # Standalone live endpoint probe
+├── docs/                       # Complete documentation suite
+│   ├── ARCHITECTURE.md
+│   ├── INSTALLATION.md
+│   ├── CONFIGURATION.md
+│   ├── API_REFERENCE.md
+│   └── RUNNABLE_EXAMPLES.md
+├── examples/                   # Executable reference scripts
+│   ├── run_offline_mock.py     # Offline mock E2E example
+│   └── run_live_9router.py     # Live 9router E2E example
+└── tests/                      # Automated test suite (690+ tests)
+    ├── unit/                   # Unit test cases
+    ├── integration/            # Multi-wave & Sentinel mock integration tests
+    ├── e2e_opaque/             # Opaque-box requirements verification suite
+    └── live/                   # Live 9router canaries
+```
 
 ---
 
-## License
+## 📄 License
 
-MIT — see [LICENSE](LICENSE).
-
-Built by [Nous Research](https://nousresearch.com).
+Hermes Teamwork is open-source software licensed under the [MIT License](LICENSE).
