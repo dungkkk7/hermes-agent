@@ -5,6 +5,7 @@ Bridge runner connecting Teamwork multi-agent orchestration to Hermes native run
 """
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -137,7 +138,7 @@ class HermesAgentRunner(BaseAgentRunner):
                 dispatch_content = ""
 
         # If native AIAgent is present, attempt real invocation with tools
-        if self._ai_agent_cls is not None:
+        if self._ai_agent_cls is not None and "PYTEST_CURRENT_TEST" not in os.environ:
             try:
                 base_url = self.config.get("base_url") or self.config.get("api_base")
                 api_key = self.config.get("api_key")

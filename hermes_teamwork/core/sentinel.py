@@ -133,6 +133,7 @@ class Sentinel:
 
         # Background cron thread controls
         self._cron_stop_event = threading.Event()
+        self._crons_lock = threading.Lock()
         self._reporting_thread: Optional[threading.Thread] = None
         self._watchdog_thread: Optional[threading.Thread] = None
         if auto_start_crons:
@@ -345,32 +346,33 @@ Generated from request:
         }
 
     def start_background_crons(self) -> None:
-        """Starts reporting and watchdog background threads."""
-        reporting_alive = self._reporting_thread is not None and self._reporting_thread.is_alive()
-        watchdog_alive = self._watchdog_thread is not None and self._watchdog_thread.is_alive()
-        if reporting_alive and watchdog_alive:
-            return
+        """Starts reporting and watchdog background threads in a thread-safe manner."""
+        with getattr(self, "_crons_lock", threading.Lock()):
+            reporting_alive = self._reporting_thread is not None and self._reporting_thread.is_alive()
+            watchdog_alive = self._watchdog_thread is not None and self._watchdog_thread.is_alive()
+            if reporting_alive and watchdog_alive:
+                return
 
-        self._cron_stop_event.clear()
+            self._cron_stop_event.clear()
 
-        def _reporting_loop():
-            while not self._cron_stop_event.wait(self.REPORTING_INTERVAL_SECONDS):
-                self.generate_progress_report()
+            def _reporting_loop():
+                while not self._cron_stop_event.wait(self.REPORTING_INTERVAL_SECONDS):
+                    self.generate_progress_report()
 
-        def _watchdog_loop():
-            while not self._cron_stop_event.wait(self.LIVENESS_INTERVAL_SECONDS):
-                self.check_liveness()
+            def _watchdog_loop():
+                while not self._cron_stop_event.wait(self.LIVENESS_INTERVAL_SECONDS):
+                    self.check_liveness()
 
-        if not reporting_alive:
-            self._reporting_thread = threading.Thread(
-                target=_reporting_loop, daemon=True, name="sentinel_reporting_cron"
-            )
-            self._reporting_thread.start()
-        if not watchdog_alive:
-            self._watchdog_thread = threading.Thread(
-                target=_watchdog_loop, daemon=True, name="sentinel_liveness_watchdog"
-            )
-            self._watchdog_thread.start()
+            if not reporting_alive:
+                self._reporting_thread = threading.Thread(
+                    target=_reporting_loop, daemon=True, name="sentinel_reporting_cron"
+                )
+                self._reporting_thread.start()
+            if not watchdog_alive:
+                self._watchdog_thread = threading.Thread(
+                    target=_watchdog_loop, daemon=True, name="sentinel_liveness_watchdog"
+                )
+                self._watchdog_thread.start()
 
     def stop_background_crons(self) -> None:
         """Gracefully halts background cron threads."""
@@ -424,11 +426,16 @@ Generated from request:
             self._orchestrator = orchestrator
             self.active_agent_id = orchestrator.latest_orchestrator.agent_name
 
+            # Configurable iterations from runner config
+            cfg_iters = 5
+            if hasattr(self.runner, "config") and isinstance(self.runner.config, dict):
+                cfg_iters = int(self.runner.config.get("max_iterations", 5))
+
             orch_success = orchestrator.execute_milestone(
                 milestone_id="M1",
                 milestone_title="Core Architecture Implementation & Regression Test",
                 scope_files=["src/", "tests/"],
-                max_iterations=3,
+                max_iterations=cfg_iters,
             )
             self.active_agent_id = orchestrator.latest_orchestrator.agent_name
 

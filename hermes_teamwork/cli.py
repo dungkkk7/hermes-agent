@@ -134,25 +134,19 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
     runner_choice = (args.runner or cfg.get("runner", "mock")).lower()
     if runner_choice == "mock":
         runner = MockAgentRunner(simulate_challenger_failure_rounds=args.fail_rounds)
+    elif runner_choice in ("9router", "openai"):
+        endpoint = cfg.get("api_base") or cfg.get("base_url") or "http://localhost:20128/v1"
+        runner = OpenAICompatibleRunner(
+            api_base=endpoint,
+            model=cfg.get("model", "netmind/openai/gpt-oss-120b"),
+            api_key=cfg.get("api_key", "mock-key"),
+            timeout=float(cfg.get("timeout", 120.0)),
+        )
     elif runner_choice == "native":
         runner = HermesAgentRunner(
             model=cfg.get("model", "netmind/openai/gpt-oss-120b"),
             config=cfg,
         )
-    elif runner_choice in ("9router", "openai"):
-        if _has_native_agent():
-            runner = HermesAgentRunner(
-                model=cfg.get("model", "netmind/openai/gpt-oss-120b"),
-                config=cfg,
-            )
-        else:
-            endpoint = cfg.get("api_base") or cfg.get("base_url") or "http://localhost:20128/v1"
-            runner = OpenAICompatibleRunner(
-                api_base=endpoint,
-                model=cfg.get("model", "netmind/openai/gpt-oss-120b"),
-                api_key=cfg.get("api_key", "mock-key"),
-                timeout=float(cfg.get("timeout", 120.0)),
-            )
     else:
         sys.stderr.write(f"Error: Unsupported runner '{runner_choice}'.\n")
         return 2

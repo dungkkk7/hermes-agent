@@ -442,6 +442,15 @@ class AgentState:
                     raise LockedSectionTamperError(
                         f"Locked section '{header}' was tampered with! Missing original line: '{line}'"
                     )
+            
+            # Defect fix: reject NEW lines not present in the old locked section.
+            # Code fence injection can insert arbitrary lines inside a locked section
+            # that are invisible to the "missing-line" check above.
+            new_only = [l for l in new_lines if l not in old_lines]
+            if new_only:
+                raise LockedSectionTamperError(
+                    f"Locked section '{header}' was tampered with! New lines inserted: {new_only[:3]}"
+                )
 
         # Check line limit
         lines = new_content.splitlines()
@@ -879,7 +888,12 @@ def parse_handoff_text(text: str, default_agent_name: str = "", default_role: st
     # Mask code fences before metadata and section extraction so fenced content cannot spoof
     masked_text = mask_fenced_code_blocks(text)
 
-    for orig_line, masked_line in zip(text.splitlines()[:20], masked_text.splitlines()[:20]):
+    # Scan up to 100 lines for metadata before sections begin
+    for orig_line, masked_line in zip(text.splitlines()[:100], masked_text.splitlines()[:100]):
+        if masked_line.strip().startswith("## 1.") or masked_line.strip().startswith("---"):
+            # Stop if we reached canonical section 1
+            if verdict != "FAIL":
+                break
         m_masked = _HANDOFF_META_RE.match(masked_line)
         if not m_masked:
             continue

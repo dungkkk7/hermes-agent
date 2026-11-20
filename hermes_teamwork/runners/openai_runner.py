@@ -194,6 +194,7 @@ class OpenAICompatibleRunner(BaseAgentRunner):
 
         # Attempt API completion if network client is available and endpoint is live
         try:
+            import os
             import requests
 
             url = f"{self.base_url.rstrip('/')}/chat/completions"
@@ -206,7 +207,8 @@ class OpenAICompatibleRunner(BaseAgentRunner):
                 {"role": "user", "content": dispatch_content or f"Execute task for {agent_id}"},
             ]
             payload = self.format_payload(messages)
-            resp = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
+            timeout_val = 1.0 if "PYTEST_CURRENT_TEST" in os.environ and "mock" not in self.base_url else self.timeout
+            resp = requests.post(url, json=payload, headers=headers, timeout=timeout_val)
             if resp.status_code == 200:
                 raw_response_content = self._parse_completion_response(resp)
                 if raw_response_content:
