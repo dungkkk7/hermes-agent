@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -91,12 +92,31 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
         sys.stderr.write("Error: A task request is required. Provide via positional argument or --request.\n")
         return 2
 
-    # Load configuration
-    cfg = load_config(args.config)
-
     # Workspace directory
     workspace_dir = Path(args.workspace).resolve()
     workspace_dir.mkdir(parents=True, exist_ok=True)
+
+    # Load configuration (with auto-lookup in workspace, cwd, and HERMES_HOME/user config)
+    config_path = args.config
+    if not config_path:
+        candidates = [
+            workspace_dir / "hermes_teamwork.yaml",
+            Path("hermes_teamwork.yaml"),
+        ]
+        if "HERMES_HOME" in os.environ:
+            candidates.append(Path(os.environ["HERMES_HOME"]) / "teamwork.yaml")
+        elif "PYTEST_CURRENT_TEST" not in os.environ:
+            candidates.append(Path.home() / ".hermes" / "teamwork.yaml")
+
+        for candidate in candidates:
+            try:
+                if candidate.is_file():
+                    config_path = str(candidate)
+                    break
+            except Exception:
+                pass
+
+    cfg = load_config(config_path)
 
     # Select runner
     runner_choice = (args.runner or cfg.get("runner", "mock")).lower()
