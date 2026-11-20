@@ -147,10 +147,16 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
 
     if isinstance(result, dict):
         status = result.get("status")
+        final_report = result.get("final_report")
     else:
         status = getattr(result, "status", None)
+        final_report = getattr(result, "final_report", None)
 
-    print(f"\nFinal Result: {result}")
+    if final_report:
+        print(f"\n{final_report.strip()}\n")
+    else:
+        print(f"\nFinal Result: {result}")
+
     if status in ("SUCCESS", "COMPLETED", "DONE"):
         return 0
     return 1
